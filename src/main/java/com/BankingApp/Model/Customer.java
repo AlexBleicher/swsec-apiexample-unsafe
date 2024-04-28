@@ -7,9 +7,10 @@ import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
-@
-        Data
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @MongoEntity
@@ -21,5 +22,5 @@ public class Customer {
     private String firstName;
     private LocalDate birthday;
     private double accountBalance;
-
+    private List<ShareHold> shareHoldList = new ArrayList<>();
 }
