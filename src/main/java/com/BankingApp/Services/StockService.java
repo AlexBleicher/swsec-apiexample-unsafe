@@ -13,7 +13,6 @@ import jakarta.inject.Inject;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @ApplicationScoped
 public class StockService {
@@ -32,6 +31,18 @@ public class StockService {
 
     public Stock getStockByName(String stockName){
         return stockRepository.findByName(stockName).orElseThrow();
+    }
+
+    public String getPredictionForStock(String stockName){
+        Stock stock = stockRepository.findByName(stockName).orElseThrow();
+        List<Trade> trades = stock.getTrades();
+        List<Trade> list = trades.stream().filter(trade -> trade.getTimeOfTrade().isAfter(LocalDateTime.now().minusDays(10))).toList();
+        double meanChange = 0;
+        for (Trade trade : list) {
+            meanChange += trade.getAmountTraded();
+        }
+        meanChange = meanChange/list.size();
+        return "Predicted change: " + meanChange + ".";
     }
 
     public void tradeStock(String stockName, TradeDTO dto){

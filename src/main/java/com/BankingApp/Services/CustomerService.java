@@ -2,6 +2,7 @@ package com.BankingApp.Services;
 
 import com.BankingApp.Model.Customer;
 import com.BankingApp.Model.DTOs.CreateCustomerDTO;
+import com.BankingApp.Model.DTOs.TransactDTO;
 import com.BankingApp.Repositories.CustomerRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -27,6 +28,18 @@ public class CustomerService {
         return customerRepository.findByBankId(id).orElseThrow();
     }
 
+    public void transaction(String id, TransactDTO dto){
+        Customer sender = customerRepository.findByBankId(id).orElseThrow();
+        Customer receiver = customerRepository.findByBankId(dto.getReceiverId()).orElseThrow();
+        double amount = dto.getAmount();
+        if(amount>(sender.getAccountBalance()+100)){
+            throw new RuntimeException("Sender can not afford this transaction.");
+        }
+        sender.setAccountBalance(sender.getAccountBalance()-amount);
+        receiver.setAccountBalance(receiver.getAccountBalance()+amount);
+        customerRepository.persistOrUpdate(sender);
+        customerRepository.persistOrUpdate(receiver);
+    }
     private String createBankId(){
         StringBuilder id = new StringBuilder();
         Random rand = new Random();
