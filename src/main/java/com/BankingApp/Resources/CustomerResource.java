@@ -1,6 +1,5 @@
 package com.BankingApp.Resources;
 
-import com.BankingApp.Model.Customer;
 import com.BankingApp.Model.DTOs.CreateCustomerDTO;
 import com.BankingApp.Model.DTOs.TransactDTO;
 import com.BankingApp.Services.CustomerService;
@@ -15,7 +14,6 @@ import org.jboss.resteasy.reactive.RestPath;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDate;
 
 @Path("/api/customers")
 public class CustomerResource {

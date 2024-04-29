@@ -46,4 +46,10 @@ public class StockResource {
         return Response.ok().build();
     }
 
+    @Path("/shareDividends/{stockName}")
+    @PATCH
+    public Response shareDividends(@RestPath String stockName){
+        stockService.shareDividends(stockName);
+        return Response.ok().build();
+    }
 }
