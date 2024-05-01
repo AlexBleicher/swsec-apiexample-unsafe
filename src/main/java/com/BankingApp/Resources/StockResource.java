@@ -3,6 +3,8 @@ package com.BankingApp.Resources;
 import com.BankingApp.Model.DTOs.CreateStockDTO;
 import com.BankingApp.Model.DTOs.TradeDTO;
 import com.BankingApp.Services.StockService;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PATCH;
@@ -21,6 +23,7 @@ public class StockResource {
     @Inject
     StockService stockService;
 
+    @PermitAll
     @POST
     public Response goPublic(CreateStockDTO dto) throws URISyntaxException {
         stockService.createStock(dto);
@@ -28,18 +31,21 @@ public class StockResource {
     }
 
     @Path("/{stockName}")
+    @PermitAll
     @GET
     public Response getByStockName(@RestPath String stockName) {
         return Response.ok(stockService.getStockByName(stockName)).build();
     }
 
     @Path("/prediction/{stockName}")
+    @PermitAll
     @GET
     public Response getPredictionForStock(@RestPath String stockName){
         return Response.ok(stockService.getPredictionForStock(stockName)).build();
     }
 
     @Path("/trade/{stockName}")
+    @RolesAllowed("user")
     @PATCH
     public Response tradeStock(@RestPath String stockName, @RequestBody TradeDTO tradeDTO){
         stockService.tradeStock(stockName, tradeDTO);
@@ -47,6 +53,7 @@ public class StockResource {
     }
 
     @Path("/shareDividends/{stockName}")
+    @RolesAllowed("admin")
     @PATCH
     public Response shareDividends(@RestPath String stockName){
         stockService.shareDividends(stockName);
