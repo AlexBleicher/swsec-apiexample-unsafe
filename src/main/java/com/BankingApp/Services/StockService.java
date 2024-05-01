@@ -22,18 +22,18 @@ public class StockService {
     @Inject
     CustomerRepository customerRepository;
 
-    public void createStock(CreateStockDTO dto){
+    public void createStock(CreateStockDTO dto) {
         Stock newStock = new Stock();
         newStock.setStockName(dto.getStockName());
         newStock.setCurrentValue(0.0);
         stockRepository.persist(newStock);
     }
 
-    public Stock getStockByName(String stockName){
+    public Stock getStockByName(String stockName) {
         return stockRepository.findByName(stockName).orElseThrow();
     }
 
-    public String getPredictionForStock(String stockName){
+    public String getPredictionForStock(String stockName) {
         Stock stock = stockRepository.findByName(stockName).orElseThrow();
         List<Trade> trades = stock.getTrades();
         List<Trade> list = trades.stream().filter(trade -> trade.getTimeOfTrade().isAfter(LocalDateTime.now().minusDays(10))).toList();
@@ -41,34 +41,50 @@ public class StockService {
         for (Trade trade : list) {
             meanChange += trade.getAmountTraded();
         }
-        meanChange = meanChange/list.size();
+        meanChange = meanChange / list.size();
         return "Predicted change: " + meanChange + ".";
     }
 
-    public void tradeStock(String stockName, TradeDTO dto){
+    public void tradeStock(String stockName, TradeDTO dto) {
         Stock stock = stockRepository.findByName(stockName).orElseThrow();
         Customer customer = customerRepository.findByBankId(dto.getBankIdOfCustomer()).orElseThrow();
         double amountBought = dto.getAmountBought();
-        if(amountBought>(customer.getAccountBalance()+100)){
+        if (amountBought > (customer.getAccountBalance() + 100)) {
             throw new RuntimeException("Customer can't afford this transaction");
         }
-        stock.setCurrentValue(stock.getCurrentValue()+amountBought);
+        stock.setCurrentValue(stock.getCurrentValue() + amountBought);
         Trade trade = new Trade(amountBought, LocalDateTime.now());
         stock.addToTrades(trade);
         List<ShareHold> shareHoldList = customer.getShareHoldList();
         boolean shareHoldChanged = false;
         for (ShareHold shareHold : shareHoldList) {
-            if(shareHold.getStockName().equals(stockName)){
-                shareHold.setAmount(shareHold.getAmount()+amountBought);
-                shareHoldChanged=true;
+            if (shareHold.getStockName().equals(stockName)) {
+                if(shareHold.getAmount()+amountBought<0){
+                    throw new RuntimeException("Amount can not be negative");
+                }
+                shareHold.setAmount(shareHold.getAmount() + amountBought);
+                shareHoldChanged = true;
             }
         }
-        if(!shareHoldChanged){
+        if (!shareHoldChanged) {
             shareHoldList.add(new ShareHold(stockName, amountBought));
         }
         customer.setShareHoldList(shareHoldList);
-        customer.setAccountBalance(customer.getAccountBalance()-amountBought);
+        customer.setAccountBalance(customer.getAccountBalance() - amountBought);
         customerRepository.persistOrUpdate(customer);
         stockRepository.persistOrUpdate(stock);
+    }
+
+    public void shareDividends(String stockName) {
+        Stock stock = stockRepository.findByName(stockName).orElseThrow();
+        List<Customer> customers = customerRepository.findAll().stream().toList();
+        List<Customer> customersWithStock = customers.stream().filter(customer -> customer.getShareHoldList().stream()
+                .filter(shareHold -> !shareHold.getStockName().equalsIgnoreCase(stockName)).toList().isEmpty()).toList();
+        if(!customersWithStock.isEmpty()) {
+            double earning = stock.getCurrentValue() / customersWithStock.size();
+            for (Customer customer : customersWithStock) {
+                customer.setAccountBalance(customer.getAccountBalance()+earning);
+            }
+        }
     }
 }
