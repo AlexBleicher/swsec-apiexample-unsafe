@@ -39,6 +39,12 @@ public class StockResource {
         return Response.ok(stockService.getPredictionForStock(stockName)).build();
     }
 
+    @Path("/allStocks")
+    @GET
+    public Response getAllStocks(){
+        return Response.ok(stockService.getAllStocks()).build();
+    }
+
     @Path("/trade/{stockName}")
     @PATCH
     public Response tradeStock(@RestPath String stockName, @RequestBody TradeDTO tradeDTO){

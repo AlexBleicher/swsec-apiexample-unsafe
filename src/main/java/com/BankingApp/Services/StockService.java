@@ -12,6 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
@@ -31,6 +32,10 @@ public class StockService {
 
     public Stock getStockByName(String stockName) {
         return stockRepository.findByName(stockName).orElseThrow();
+    }
+
+    public List<Stock> getAllStocks(){
+        return stockRepository.findAll().stream().toList();
     }
 
     public String getPredictionForStock(String stockName) {
@@ -78,13 +83,21 @@ public class StockService {
     public void shareDividends(String stockName) {
         Stock stock = stockRepository.findByName(stockName).orElseThrow();
         List<Customer> customers = customerRepository.findAll().stream().toList();
-        List<Customer> customersWithStock = customers.stream().filter(customer -> customer.getShareHoldList().stream()
-                .filter(shareHold -> !shareHold.getStockName().equalsIgnoreCase(stockName)).toList().isEmpty()).toList();
+        List<Customer> customersWithStock = new ArrayList<>();
+        for (Customer customer : customers) {
+            List<ShareHold> shareHoldList = customer.getShareHoldList();
+            for (ShareHold shareHold : shareHoldList) {
+                if(shareHold.getStockName().equalsIgnoreCase(stockName)){
+                    customersWithStock.add(customer);
+                }
+            }
+        }
         if(!customersWithStock.isEmpty()) {
             double earning = stock.getCurrentValue() / customersWithStock.size();
             for (Customer customer : customersWithStock) {
                 customer.setAccountBalance(customer.getAccountBalance()+earning);
             }
+            customerRepository.persistOrUpdate(customersWithStock);
         }
     }
 }
