@@ -45,6 +45,7 @@ public class StockResource {
     }
 
     @Path("/allStocks")
+    @PermitAll
     @GET
     public Response getAllStocks(){
         return Response.ok(stockService.getAllStocks()).build();
