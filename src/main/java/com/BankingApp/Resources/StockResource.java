@@ -44,6 +44,12 @@ public class StockResource {
         return Response.ok(stockService.getPredictionForStock(stockName)).build();
     }
 
+    @Path("/allStocks")
+    @GET
+    public Response getAllStocks(){
+        return Response.ok(stockService.getAllStocks()).build();
+    }
+
     @Path("/trade/{stockName}")
     @RolesAllowed("user")
     @PATCH

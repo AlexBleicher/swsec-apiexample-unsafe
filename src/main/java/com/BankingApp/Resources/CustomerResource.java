@@ -29,6 +29,11 @@ public class CustomerResource {
         return Response.ok(customerService.getCustomerById(id)).build();
     }
 
+    @Path("/getAllCustomers")
+    @GET
+    public Response getAllCustomers(){
+        return Response.ok(customerService.getAllCustomers()).build();
+    }
     @PermitAll
     @POST
     public Response createCustomer(@RequestBody CreateCustomerDTO dto) throws URISyntaxException {
