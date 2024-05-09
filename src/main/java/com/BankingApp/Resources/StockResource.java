@@ -31,7 +31,7 @@ public class StockResource {
     }
 
     @Path("/{stockName}")
-    @PermitAll
+    @RolesAllowed("admin")
     @GET
     public Response getByStockName(@RestPath String stockName) {
         return Response.ok(stockService.getStockByName(stockName)).build();

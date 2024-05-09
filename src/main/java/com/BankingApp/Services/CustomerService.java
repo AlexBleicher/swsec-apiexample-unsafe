@@ -2,11 +2,13 @@ package com.BankingApp.Services;
 
 import com.BankingApp.Model.Customer;
 import com.BankingApp.Model.DTOs.CreateCustomerDTO;
+import com.BankingApp.Model.DTOs.GetCustomerDTO;
 import com.BankingApp.Model.DTOs.TransactDTO;
 import com.BankingApp.Repositories.CustomerRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -30,8 +32,17 @@ public class CustomerService {
         return customerRepository.findByBankId(id).orElseThrow();
     }
 
-    public List<Customer> getAllCustomers() {
-        return customerRepository.findAll().stream().toList();
+    public List<GetCustomerDTO> getAllCustomers() {
+        List<Customer> list = customerRepository.findAll().stream().toList();
+        List<GetCustomerDTO> resultList = new ArrayList<>();
+        for (Customer customer : list) {
+            GetCustomerDTO listObject = new GetCustomerDTO();
+            listObject.setBankId(customer.getBankId());
+            listObject.setLastName(customer.getLastName());
+            listObject.setFirstName(customer.getFirstName());
+            resultList.add(listObject);
+        }
+        return resultList;
     }
 
     public void transaction(String id, TransactDTO dto) {

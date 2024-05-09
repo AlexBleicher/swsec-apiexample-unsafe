@@ -2,6 +2,7 @@ package com.BankingApp.Services;
 
 import com.BankingApp.Model.Customer;
 import com.BankingApp.Model.DTOs.CreateStockDTO;
+import com.BankingApp.Model.DTOs.GetStockDTO;
 import com.BankingApp.Model.DTOs.TradeDTO;
 import com.BankingApp.Model.ShareHold;
 import com.BankingApp.Model.Stock;
@@ -34,8 +35,16 @@ public class StockService {
         return stockRepository.findByName(stockName).orElseThrow();
     }
 
-    public List<Stock> getAllStocks(){
-        return stockRepository.findAll().stream().toList();
+    public List<GetStockDTO> getAllStocks() {
+        List<Stock> list = stockRepository.findAll().stream().toList();
+        List<GetStockDTO> resultList = new ArrayList<>();
+        for (Stock stock : list) {
+            GetStockDTO listObject = new GetStockDTO();
+            listObject.setCurrentValue(stock.getCurrentValue());
+            listObject.setStockName(stock.getStockName());
+            resultList.add(listObject);
+        }
+        return resultList;
     }
 
     public String getPredictionForStock(String stockName) {
@@ -64,7 +73,7 @@ public class StockService {
         boolean shareHoldChanged = false;
         for (ShareHold shareHold : shareHoldList) {
             if (shareHold.getStockName().equals(stockName)) {
-                if(shareHold.getAmount()+amountBought<0){
+                if (shareHold.getAmount() + amountBought < 0) {
                     throw new RuntimeException("Amount can not be negative");
                 }
                 shareHold.setAmount(shareHold.getAmount() + amountBought);
@@ -87,15 +96,15 @@ public class StockService {
         for (Customer customer : customers) {
             List<ShareHold> shareHoldList = customer.getShareHoldList();
             for (ShareHold shareHold : shareHoldList) {
-                if(shareHold.getStockName().equalsIgnoreCase(stockName)){
+                if (shareHold.getStockName().equalsIgnoreCase(stockName)) {
                     customersWithStock.add(customer);
                 }
             }
         }
-        if(!customersWithStock.isEmpty()) {
+        if (!customersWithStock.isEmpty()) {
             double earning = stock.getCurrentValue() / customersWithStock.size();
             for (Customer customer : customersWithStock) {
-                customer.setAccountBalance(customer.getAccountBalance()+earning);
+                customer.setAccountBalance(customer.getAccountBalance() + earning);
             }
             customerRepository.persistOrUpdate(customersWithStock);
         }

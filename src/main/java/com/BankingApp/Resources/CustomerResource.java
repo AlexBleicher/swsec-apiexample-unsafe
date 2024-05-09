@@ -23,7 +23,7 @@ public class CustomerResource {
     @Inject
     CustomerService customerService;
     @Path("/getCustomer/{id}")
-    @PermitAll
+    @RolesAllowed("admin")
     @GET
     public Response getCustomer(@RestPath String id){
         return Response.ok(customerService.getCustomerById(id)).build();
