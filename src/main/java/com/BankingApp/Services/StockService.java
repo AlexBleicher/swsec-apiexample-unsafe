@@ -41,7 +41,7 @@ public class StockService {
     public String getPredictionForStock(String stockName) {
         Stock stock = stockRepository.findByName(stockName).orElseThrow();
         List<Trade> trades = stock.getTrades();
-        List<Trade> list = trades.stream().filter(trade -> trade.getTimeOfTrade().isAfter(LocalDateTime.now().minusDays(10))).toList();
+        List<Trade> list = trades.stream().filter(trade -> trade.getTimeOfTrade().isAfter(LocalDateTime.now().minusDays(2))).toList();
         double meanChange = 0;
         for (Trade trade : list) {
             meanChange += trade.getAmountTraded();
